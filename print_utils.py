@@ -5,3 +5,6 @@ def pretty_print(func):
         result = func(*args, **kwargs)
         return result
     return wrapper_function
+
+def print_bin(b):
+    print(bin(b)[2:], end=' ')
