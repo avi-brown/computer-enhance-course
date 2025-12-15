@@ -49,7 +49,7 @@ class Decoder_8086:
     @pretty_print
     def print_current_op(self):
         print("CURRENT OP: ", self.op)
-
+hi
 if __name__ == "__main__":
     decoder = Decoder_8086(sys.argv[1])
     decoder.read_file()
