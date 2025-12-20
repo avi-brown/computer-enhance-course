@@ -1,6 +1,5 @@
 import sys
 sys.path.append("..")
-from print_utils import pretty_print, print_bin
 
 class Decoder_8086:
     def __init__(self, path):
@@ -18,20 +17,39 @@ class Decoder_8086:
             0b100010: 'mov',
         }
 
-    def read_file(self):
+        self.registers = {
+            '0000': 'al',
+            '0001': 'cl',
+            '0010': 'dl',
+            '0011': 'bl',
+            '0100': 'ah',
+            '0101': 'ch',
+            '0110': 'dh',
+            '0111': 'bh',
+            '1000': 'ax',
+            '1001': 'cx',
+            '1010': 'dx',
+            '1011': 'bx',
+            '1100': 'sp',
+            '1101': 'bp',
+            '1110': 'si',
+            '1111': 'di',
+        }
+
+    def read_asm(self):
         self.file = open(self.path, 'rb')
         raw_bytes_data = self.file.read()
         for byte in raw_bytes_data:
             self.ops.append(''.join(f'{byte:08b}'))
-        for i in range(0, len(self.ops) - 1, 2):
+    
+        # build the ops
+        i = 0
+        while i < len(self.ops) - 1:
             self.ops[i] = self.ops[i] + self.ops[i+1]
-        for i in range(1, 6, 2):
-            self.ops.pop(i)
-        print(self.ops)
+            self.ops.pop(i+1)
+            i += 1
         
-    @pretty_print
     def decode_op(self, op):    
-        print(op)
         self.op = self.opcodes[int(op[:6], 2)]
         self.d = int(op[6], 2)
         self.w = int(op[7], 2)
@@ -39,19 +57,12 @@ class Decoder_8086:
         self.reg = int(op[10:13], 2)
         self.rm = int(op[13:16], 2)
 
-        print(self.op)
-        print_bin(self.d)
-        print_bin(self.w)
-        print_bin(self.mod)
-        print_bin(self.reg) 
-        print_bin(self.rm)
+        # lookup and print out decoded operations in asm
+        return f"{self.op} {self.registers[f"{self.w:01b}{self.rm:03b}"]}, {self.registers[f"{self.w:01b}{self.reg:03b}"]}"
 
-    @pretty_print
-    def print_current_op(self):
-        print("CURRENT OP: ", self.op)
-hi
 if __name__ == "__main__":
     decoder = Decoder_8086(sys.argv[1])
-    decoder.read_file()
+    decoder.read_asm()
+    output_file = open('output.asm', 'w')
     for op in decoder.ops:
-        decoder.decode_op(op)
+        output_file.write(decoder.decode_op(op) + "\n")
